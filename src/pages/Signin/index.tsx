@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useContext } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
 import LogoImg from '../../assets/logo.svg';
 import { Container, Content, Background } from './styles';
@@ -7,7 +7,7 @@ import Button from '../../components/Button';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
-import { AuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/AuthContext';
 import getValidationErros from '../../utils/getValidationErros';
 
 interface SigInFormData {
@@ -17,9 +17,9 @@ interface SigInFormData {
 
 const Signin: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
-  const { sigIn, user } = useContext(AuthContext);
-  console.log('User:', user);
-  console.log('formRef :', formRef);
+  const { sigIn } = useAuth();
+  //console.log('User:', user);
+  //console.log('formRef :', formRef);
 
   const handleSubmit = useCallback(
     async (data: SigInFormData) => {
@@ -41,8 +41,11 @@ const Signin: React.FC = () => {
         });
       } catch (error) {
         console.log('error', error);
-        const errors = getValidationErros(error);
-        formRef.current?.setErrors(errors);
+        if (error instanceof Yup.ValidationError) {
+          const errors = getValidationErros(error);
+          formRef.current?.setErrors(errors);
+        }
+        //disparar um toast
       }
     },
     [sigIn],
