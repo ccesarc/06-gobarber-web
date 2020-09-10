@@ -7,7 +7,8 @@ import Button from '../../components/Button';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
-import { useAuth } from '../../hooks/AuthContext';
+import { useAuth } from '../../hooks/auth';
+import { useToast } from '../../hooks/toast';
 import getValidationErros from '../../utils/getValidationErros';
 
 interface SigInFormData {
@@ -18,6 +19,8 @@ interface SigInFormData {
 const Signin: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { sigIn } = useAuth();
+  const { addToast } = useToast();
+
   //console.log('User:', user);
   //console.log('formRef :', formRef);
 
@@ -35,7 +38,7 @@ const Signin: React.FC = () => {
         await schema.validate(data, {
           abortEarly: false,
         });
-        sigIn({
+        await sigIn({
           email: data.email,
           password: data.password,
         });
@@ -45,10 +48,14 @@ const Signin: React.FC = () => {
           const errors = getValidationErros(error);
           formRef.current?.setErrors(errors);
         }
-        //disparar um toast
+        addToast({
+          type: 'error',
+          title: 'Erro na autenticação',
+          description: 'Ocorreu um erro ao fazer login',
+        });
       }
     },
-    [sigIn],
+    [sigIn, addToast],
   );
 
   return (
